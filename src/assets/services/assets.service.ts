@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import CoincapRequestException from '../exceptions/CoincapRequestException';
 import Asset from '../interfaces/asset.interface';
 
 // This class fetches data from the /assets endpoint of the coincap.io API
@@ -28,7 +29,7 @@ class AssetsService {
             }})
             .then(res => {
                 if (!res.ok) {
-                    throw new Error(res.statusText);
+                    throw new CoincapRequestException(res.statusText);
                 }
                 return res.json() as Promise<{data: Asset[]}>;
             })
@@ -36,10 +37,6 @@ class AssetsService {
                 // Store current time for freshness test later on
                 this.lastFetch = new Date();
                 return data.data;
-            })
-            .catch(err => {
-                console.error(err);
-                throw new Error("Could not cast fetched json array to Array<Asset>.");
             });
         }
         
@@ -55,7 +52,7 @@ class AssetsService {
     }
 
     // Fetches data for a specific asset
-    public async getAsset(id: string): Promise<Asset> {
+    public async getAssetById(id: string): Promise<Asset> {
         const assets = await this.getAllAssets();
         const asset = assets.find(a => a.id === id);
         if (!asset) {
