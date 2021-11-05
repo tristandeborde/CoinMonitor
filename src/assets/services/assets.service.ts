@@ -20,7 +20,12 @@ class AssetsService {
     
     // Cast the node-fetch response to Array of Asset objects
     private fetchAndCastToAssets(): Promise<Asset[]> {
-        return fetch(this.endpoint)
+        console.log("Fetching assets from " + this.endpoint);
+        // Perform fetch with Bearer token header
+        return fetch(this.endpoint, {
+            headers: {
+                'Authorization': 'Bearer ' + process.env.COINCAP_API_KEY
+            }})
             .then(res => {
                 if (!res.ok) {
                     throw new Error(res.statusText);
