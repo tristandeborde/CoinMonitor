@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import CoincapRequestException from '../exceptions/CoincapRequestException';
-import Asset from '../interfaces/asset.interface';
+import RawAsset from '../interfaces/asset.interface';
+import { Asset } from '../interfaces/asset.interface';
 
 // This class fetches data from the /assets endpoint of the coincap.io API
 // and stores it in-memory.
@@ -20,24 +21,27 @@ class AssetsService {
     }
     
     // Cast the node-fetch response to Array of Asset objects
-    private fetchAndCastToAssets(): Promise<Asset[]> {
+    private async fetchAndCastToAssets(): Promise<Asset[]> {
         console.log("Fetching assets from " + this.endpoint);
         // Perform fetch with Bearer token header
-        return fetch(this.endpoint, {
+        const res = await fetch(this.endpoint, {
             headers: {
                 'Authorization': 'Bearer ' + process.env.COINCAP_API_KEY
-            }})
-            .then(res => {
-                if (!res.ok) {
-                    throw new CoincapRequestException(res.statusText);
-                }
-                return res.json() as Promise<{data: Asset[]}>;
-            })
-            .then(data => {
-                // Store current time for freshness test later on
-                this.lastFetch = new Date();
-                return data.data;
-            });
+            }
+        });
+        if (!res.ok) {
+            throw new CoincapRequestException(res.statusText);
+        }
+        const data = await (res.json() as Promise<{ data: RawAsset[]; }>);
+        // Store current time for freshness test later on
+        this.lastFetch = new Date();
+        // Cast the array of RawAssets Interface instances to real Asset objects
+        let assets: Asset[] = [];
+        for (const raw of data.data) {
+            let asset: Asset = new Asset(raw);
+            assets.push(asset);
+        }
+        return assets;
         }
         
     // Fetches all data from the coincap.io API 
