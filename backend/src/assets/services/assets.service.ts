@@ -1,21 +1,28 @@
+import { SSL_OP_COOKIE_EXCHANGE } from 'constants';
 import fetch from 'node-fetch';
+import AssetNotFoundException from '../exceptions/AssetNotFoundException';
 import CoincapRequestException from '../exceptions/CoincapRequestException';
 import RawAsset from '../interfaces/asset.interface';
 import { Asset } from '../interfaces/asset.interface';
+import AssetHistories from '../interfaces/assetHistories.interface';
+import rawAssetHistoryEvent from '../interfaces/assetHistoryEvent.interface';
+import { AssetHistoryEvent } from '../interfaces/assetHistoryEvent.interface';
 
 // This class fetches data from the /assets endpoint of the coincap.io API
 // and stores it in-memory.
 class AssetsService {
     // The endpoint to fetch data from.
     private endpoint: string = 'https://api.coincap.io/v2/assets';
-    // In-memory store for the assets data.
+    // In-memory cache for the assets data.
     private assets: Asset[] = [];
-    private lastFetch: Date = new Date();
+    // In-memory cache for the history data.
+    private assetHistories: AssetHistories = {};
+    private updatedAt: Date = new Date();
 
     // Checks if data is fresh (X seconds elapsed since last fetch)
-    private isDataFresh(threshold: number): boolean {
+    private isDataFresh(threshold: number, updatedAt: Date): boolean {
         const now = new Date();
-        const timeDiff = now.getTime() - this.lastFetch.getTime();
+        const timeDiff = now.getTime() - updatedAt.getTime();
         const secondsElapsed = Math.floor(timeDiff / 1000);
         return secondsElapsed < threshold;
     }
@@ -33,8 +40,6 @@ class AssetsService {
             throw new CoincapRequestException(res.statusText);
         }
         const data = await (res.json() as Promise<{ data: RawAsset[]; }>);
-        // Store current time for freshness test later on
-        this.lastFetch = new Date();
         // Cast the array of RawAssets Interface instances to real Asset objects
         let assets: Asset[] = [];
         for (const raw of data.data) {
@@ -47,22 +52,55 @@ class AssetsService {
     // Fetches all data from the coincap.io API 
     public async getAllAssets(): Promise<Asset []> {
         // Check if data is fresh with arbitrary threshold of 10 seconds
-        if (this.assets && this.assets.length > 0 && this.isDataFresh(10)) {
+        if (this.assets && this.assets.length > 0 && this.isDataFresh(10, this.updatedAt)) {
             return this.assets;
         }
-        // Call fetchAndCastToAssets() and store the results in this.assets
+        // Call fetchAndCastToAssets() to populate the assets cache
         this.assets = await this.fetchAndCastToAssets();
+        // Store current time for freshness test later on
+        this.updatedAt = new Date();
         return this.assets;
     }
 
     // Fetches data for a specific asset
-    public async getAssetById(id: string): Promise<Asset> {
+    public async getAssetById(id: string): Promise<Asset | undefined> {
         const assets = await this.getAllAssets();
-        const asset = assets.find(a => a.id === id);
-        if (!asset) {
-            throw new Error("Asset with id " + id + " cloud not be found.");
+        return assets.find(a => a.id === id);
+    }
+
+    private async fetchOneAssetHistory(id: string): Promise<AssetHistoryEvent[]> {
+        console.log("Fetching history for " + id);
+        const res = await fetch(this.endpoint + "/" + id + "/history?interval=d1", {
+            headers: {
+                'Authorization': 'Bearer ' + process.env.COINCAP_API_KEY
+            }
+        });
+        if (!res.ok) {
+            throw new CoincapRequestException(res.statusText);
         }
-        return asset;
+        const data = await (res.json() as Promise<{ data: rawAssetHistoryEvent[]; }>);
+        // Cast the elements of data into AssetHistoryEvent objects
+        let events: AssetHistoryEvent[] = [];
+        for (const raw of data.data) {
+            let event: AssetHistoryEvent = new AssetHistoryEvent(raw);
+            events.push(event);
+        }
+        return events;
+    }
+
+    public async getAssetHistory(id: string): Promise<AssetHistoryEvent[]> {
+        // Check if data is fresh, threshold is one day (interval)
+        if (this.assetHistories[id] && this.isDataFresh(86400, this.assetHistories[id].updatedAt)) {
+            return this.assetHistories[id].history.slice(0, 30);
+        }
+
+        // Call getAssetHistories to populate the history cache
+        let history: AssetHistoryEvent[] = await this.fetchOneAssetHistory(id);
+        this.assetHistories[id] = {
+            history: history,
+            updatedAt: new Date() // Store current time for freshness test later on
+        };
+        return history.slice(0,30);
     }
 }
 
