@@ -11,10 +11,14 @@ import rawAssetHistoryEvent, { AssetHistoryEvent } from './models/CLIassetHistor
  */
 export class Dashboard {
     endpoint: string = "http://" + process.env.HOSTNAME + ":" + process.env.PORT;
+    // Blessed widgets
     screen: blessed.Widgets.Screen = blessed.screen({});
     table: any = {};
     line: any = {};
+    lcd: any = {};
+    pic: any = {};
     grid: any = {};
+    // Widget data fetched from Back-end
     keys: string[] = ['rank', 'symbol', 'name', 'price', 'change'];
     table_data: Array<string|number>[] = [];
     line_data: any = {};
@@ -22,6 +26,8 @@ export class Dashboard {
     assetIds: string[] = [];
     refresh_rate: number;
     search_term: string;
+    lcd_it:number = 0;
+    lcd_text: string[] = ['C', 'O', 'I', 'N', ' ', 'W', 'A', 'T', 'C', 'H', 'E', 'R'];
 
     constructor (refresh_rate: number, search_term: string) {
         this.refresh_rate = refresh_rate * 1000;
@@ -35,12 +41,13 @@ export class Dashboard {
     launch() {
         // Create new blessed screen and grid
         this.screen = blessed.screen();
-        this.grid = new contrib.grid({rows: 1, cols: 2, screen: this.screen});
+        this.grid = new contrib.grid({rows: 2, cols: 2, screen: this.screen});
         
         this.screen.key(['escape', 'q', 'C-c'], function(ch, key) {
             return process.exit(0);
         });
         
+        // Create table widget to display the top 150 assets
         this.table = this.grid.set(0, 0, 1, 1, contrib.table, {
             keys: true, 
             vi: true,
@@ -48,7 +55,7 @@ export class Dashboard {
             selectedFg: 'white', 
             selectedBg: 'blue', 
             interactive: true, 
-            label: 'Cryptocurrencies',
+            label: 'Cryptocurrencies - select one by pressing Enter!',
             width: '30%', 
             height: '30%', 
             border: {type: "line", fg: "cyan"}, 
@@ -56,6 +63,7 @@ export class Dashboard {
             columnWidth: [8, 8, 20, 12, 12]
         });
 
+        // Line chart to display Asset Price history
         this.line = this.grid.set(0, 1, 1, 1, contrib.line, {
             style:
                 { line: "yellow"
@@ -67,6 +75,18 @@ export class Dashboard {
             wholeNumbersOnly: false, //true=do not show fraction in y axis
             label: 'Price in USD'
         });
+
+        // Little LCD display for uber-hacking purposes
+        this.lcd = this.grid.set(1, 0, 1, 1, contrib.lcd, {
+            segmentWidth: 0.06, // how wide are the segments in % so 50% = 0.5
+            segmentInterval: 0.11, // spacing between the segments in % so 50% = 0.550% = 0.5
+            strokeWidth: 0.11, // spacing between the segments in % so 50% = 0.5
+            elements: 4, // how many elements in the display. or how many characters can be displayed
+            elementSpacing: 4, // spacing between each element
+            elementPadding: 2, // how far away from the edges to put the elements
+            color: 'magenta', // color for the segments
+            label: ''})
+        this.lcd.setDisplay(this.lcd_text.slice(0, 4).join(''));
 
         this.table.focus();
         this.table.rows.on('select', (item: any, index: any) => {
@@ -87,7 +107,7 @@ export class Dashboard {
         this.fetchLineData().then((data) => {
             this.line_data = data;
             this.render();
-            });
+        });
         if (this.refresh_rate) {
             setInterval(() => {
                 this.fetchTableData().then((data) => {
@@ -96,13 +116,19 @@ export class Dashboard {
                 });
             }, this.refresh_rate);
         }
+        setInterval(() => {            
+            this.lcd_it++;
+            let curr: number = this.lcd_it % this.lcd_text.length;
+            this.lcd.setDisplay(this.lcd_text.slice(curr, curr + 4).join(''));
+            this.render();
+        }, 1000);
     }
 
     /*
-     * Get the top 150 assets' data from the server, and store it in the table_data variable.
-     * If the search_term is not empty, filter the data.
-     * @returns A promise that resolves to the table_data variable.
-     */
+    * Get the top 150 assets' data from the server, and store it in the table_data variable.
+    * If the search_term is not empty, filter the data.
+    * @returns A promise that resolves to the table_data variable.
+    */
     private async fetchTableData(): Promise<Array<string|number>[]> {
         let endpoint = this.endpoint + "/assets";
         if (this.search_term) {
