@@ -5,8 +5,11 @@ import RawAsset, { Asset } from './CLIasset_interface';
 import fetch from 'node-fetch';
 import rawAssetHistoryEvent, { AssetHistoryEvent } from './CLIassetHistory_interface';
 
+// load the environment variables from the .env file
+require('dotenv').config();
+
 class AssetWatcher extends EventEmitter {
-    endpoint: string = "http://localhost:8088/assets";
+    endpoint: string = "http://" + process.env.HOSTNAME + ":" + process.env.PORT + "/assets";
     screen: blessed.Widgets.Screen = blessed.screen({});
     table: any = {};
     line: any = {};

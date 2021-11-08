@@ -13,6 +13,7 @@
   "dependencies": {
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.10.1",
+    "dotenv": "^10.0.0",
     "node-fetch": "^2.6.6"
   },
   "devDependencies": {
