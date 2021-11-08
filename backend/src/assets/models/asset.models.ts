@@ -1,3 +1,8 @@
+/*
+ * Because CoinCap's API returns numerical values as strings,
+ * our interface simply receives string values for all properties.
+ * Type casting is achieved in the class below.
+ */
 interface RawAsset {
     id: string;
     rank: string;
@@ -14,6 +19,10 @@ interface RawAsset {
 
 export default RawAsset;
 
+/*
+ * The class below is used to type cast the values of the interface.
+ * The heavy use of parseInt/parseFloat allows us to return numbers.
+ */
 class Asset {
     id: string = "";
     rank: number = 0;

@@ -1,12 +1,16 @@
 import fetch from 'node-fetch';
-import CoincapRequestException from '../../exceptions/CoincapRequestException';
+import CoincapRequestException from '../../common/exceptions/CoincapRequestException';
 import AssetHistories from '../models/assetHistories.models';
 import rawAssetHistoryEvent from '../models/assetHistoryEvent.models';
 import { AssetHistoryEvent } from '../models/assetHistoryEvent.models';
 
 /** 
- * This class fetches data from the /assets endpoint of the coincap.io API
- * and stores it in-memory.
+ * This service class fetches history data concerning one Asset (i.e. a crypto-currency)
+ * from the "/assets/:id/history" endpoint of the coincap.io API, and stores it in-memory.
+ * The main reason this class exists is because we want to preserve the app logic 
+ * handled by the controller from the fetches, storing, and other manoeuvers happening here. 
+ * This way, we can add new endpoints from different sources without having to change the
+ * controller, or use a DB instead of the cache, etc.
 */
 class AssetHistoryService {
     // The endpoint to fetch data from.
@@ -29,7 +33,7 @@ class AssetHistoryService {
     /* 
      * Fetches data from the coincap.io API and stores it in-memory.
      * @param id string key used to identify an asset in the CoinCap API
-     * @returns an array of AssetHistoryEvent, containing a time and a price
+     * @returns Array of AssetHistoryEvent, containing a time and a price
      */
     private async fetchOneAssetHistory(id: string): Promise<AssetHistoryEvent[]> {
         console.log("Fetching history for " + id);

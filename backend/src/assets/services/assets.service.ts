@@ -1,11 +1,17 @@
 import fetch from 'node-fetch';
-import CoincapRequestException from '../../exceptions/CoincapRequestException';
+import CoincapRequestException from '../../common/exceptions/CoincapRequestException';
 import RawAsset from '../models/asset.models';
 import { Asset } from '../models/asset.models';
 import fuzzysort from 'fuzzysort';
 
-// This class fetches data from the /assets endpoint of the coincap.io API
-// and stores it in-memory.
+/** 
+ * This service class fetches an array of Assets (i.e. a crypto-currency) from the "/assets/"
+ * endpoint of the coincap.io API, and stores it in-memory.
+ * The main reason this class exists is because we want to preserve the app logic 
+ * handled by the controller from the fetches, storing, and other manoeuvers happening here. 
+ * This way, we can add new endpoints from different sources without having to change the
+ * controller, or use a DB instead of the cache, etc.
+*/
 class AssetsService {
     // The endpoint to fetch data from.
     private endpoint: string = 'https://api.coincap.io/v2/assets';
@@ -13,7 +19,11 @@ class AssetsService {
     private assets: Asset[] = [];
     private updatedAt: Date = new Date();
 
-    // Checks if data is fresh (X seconds elapsed since last fetch)
+    /* 
+     * Checks if data is fresh (X seconds elapsed since last fetch).
+     * @param threshold number of seconds before which data is considered fresh
+     * @param updatedAt time of last fetch
+     */
     private isDataFresh(threshold: number, updatedAt: Date): boolean {
         const now = new Date();
         const timeDiff = now.getTime() - updatedAt.getTime();
@@ -21,11 +31,17 @@ class AssetsService {
         return secondsElapsed < threshold;
     }
     
-    // Cast the node-fetch response to Array of Asset objects
+    /* 
+     * Cast the node-fetch response to an Array of Asset objects.
+     * This is necessary because the coincap.io API returns a JSON object with
+     * every property of the Asset being a string; and we want to cast some 
+     * some numerical properties from string to number. 
+     * @returns Promise of an Array of Asset objects
+     */
     private async fetchAndCastToAssets(): Promise<Asset[]> {
         console.log("Fetching assets from " + this.endpoint);
         // Perform fetch with Bearer token header
-        const res = await fetch(this.endpoint, {
+        const res = await fetch(this.endpoint + "?limit=150", {
             headers: {
                 'Authorization': 'Bearer ' + process.env.COINCAP_API_KEY
             }
@@ -43,7 +59,11 @@ class AssetsService {
         return assets;
         }
         
-    // Fetches all data from the coincap.io API 
+    /* 
+     * Fetches all 150 Assets from the coincap.io API. We first check if the data is fresh,
+     * and either fetch it from the API or return the cached data.
+     * @returns Promise of an Array of Asset objects
+     */
     public async getAllAssets(): Promise<Asset []> {
         // Check if data is fresh with arbitrary threshold of 10 seconds
         if (this.assets && this.assets.length > 0 && this.isDataFresh(10, this.updatedAt)) {
@@ -56,7 +76,13 @@ class AssetsService {
         return this.assets;
     }
 
-    // Search for assets by name, and return the closest results
+    /*
+     * Search for assets by name, and return the closest results. This is
+     * mainly a wrapper around getAllAssets, with a fuzzy search running
+     * on the assets array to find the closest matches.
+     * @param search_term query string to search for
+     * @returns Promise of an Array of Asset objects
+     */
     public async searchAssets(search_term: string): Promise<Asset[]> {
         console.log("Searching for assets with search_term = " + search_term);
         // Get all assets in cache or fetch them
