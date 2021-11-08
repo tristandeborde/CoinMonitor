@@ -2,7 +2,7 @@
 local_build_%:
 	docker build -t backend -f docker/Dockerfile .
 	docker rm -f backend_$*
-	docker run -p 5000:5000 --name=backend_$* -d backend -c "npm run $*"
+	docker run -p 5000:5000 --name=backend_$* -v "${PWD}/backend:/usr/local/backend" -d backend -c "npm run $*"
 
 local_test_%:
 	docker exec -it backend_$* bash -c "cd /usr/local/backend && npm run test"

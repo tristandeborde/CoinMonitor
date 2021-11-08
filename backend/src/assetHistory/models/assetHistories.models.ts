@@ -1,4 +1,4 @@
-import { AssetHistoryEvent }from './assetHistoryEvent.interface';
+import { AssetHistoryEvent }from './assetHistoryEvent.models';
 
 class AssetHistories {
     [key: string]: {history: AssetHistoryEvent[], updatedAt: Date},

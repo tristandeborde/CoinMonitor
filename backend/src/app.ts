@@ -1,6 +1,7 @@
 import express from 'express';
-import Controller from './assets/interfaces/controller.interface';
+import Controller from './models/controller.models';
 import AssetsController from './assets/assets.controller';
+import AssetHistoryController from './assetHistory/assetHistory.controller';
 import ErrorMiddleWare from './middleware/error.middleware';
 
 // load the environment variables from the .env file
@@ -35,5 +36,5 @@ class App {
     }
 }
 
-const app = new App([new AssetsController()]);
+const app = new App([new AssetsController(), new AssetHistoryController()]);
 app.listen();

@@ -1,11 +1,11 @@
 import blessed from 'blessed';
 import contrib from 'blessed-contrib';
-import RawAsset, { Asset } from './interfaces/CLIasset_interface';
+import RawAsset, { Asset } from './models/CLIasset.models';
 import fetch from 'node-fetch';
-import rawAssetHistoryEvent, { AssetHistoryEvent } from './interfaces/CLIassetHistory_interface';
+import rawAssetHistoryEvent, { AssetHistoryEvent } from './models/CLIassetHistory.models';
 
 export class Dashboard {
-    endpoint: string = "http://" + process.env.HOSTNAME + ":" + process.env.PORT + "/assets";
+    endpoint: string = "http://" + process.env.HOSTNAME + ":" + process.env.PORT;
     screen: blessed.Widgets.Screen = blessed.screen({});
     table: any = {};
     line: any = {};
@@ -61,8 +61,8 @@ export class Dashboard {
 
         this.table.focus();
         this.table.rows.on('select', (item: any, index: any) => {
-            if (this.selected != this.assetIds[index + 1]) {
-                this.selected = this.assetIds[index + 1];
+            if (this.selected != this.assetIds[index]) {
+                this.selected = this.assetIds[index];
                 this.fetchLineData().then((data) => {
                     this.line_data = data;
                     this.render();
@@ -90,9 +90,9 @@ export class Dashboard {
     }
 
     private async fetchTableData(): Promise<Array<string|number>[]> {
-        let endpoint = this.endpoint;
+        let endpoint = this.endpoint + "/assets";
         if (this.search_term) {
-            endpoint = this.endpoint + "?search_term=" + this.search_term;
+            endpoint += "?search_term=" + this.search_term;
         }
         const response = await fetch(endpoint);
         const data = await response.json() as RawAsset[];
@@ -109,7 +109,7 @@ export class Dashboard {
 
     private async fetchLineData(): Promise<any> {
         // Pass id to fetch
-        const response = await fetch(this.endpoint + "/" + this.selected + "/history");
+        const response = await fetch(this.endpoint + "/history/" + this.selected);
         const data = await response.json() as rawAssetHistoryEvent[];
         
         let line_data_x: Array<string> = [];

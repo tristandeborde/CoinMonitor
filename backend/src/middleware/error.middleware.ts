@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import HttpException from '../assets/exceptions/HttpException';
+import HttpException from '../exceptions/HttpException';
  
 function ErrorMiddleWare(error: HttpException, request: Request, response: Response, next: NextFunction) {
   const status = error.status || 500; // Default status is 500

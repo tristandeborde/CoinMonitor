@@ -1,8 +1,8 @@
 import express, { NextFunction } from 'express';
 import AssetsService from './services/assets.service';
-import Controller from './interfaces/controller.interface';
-import AssetsNotFoundException from './exceptions/AssetsNotFoundException';
-import AssetNotFoundException from './exceptions/AssetNotFoundException';
+import Controller from '../models/controller.models';
+import AssetsNotFoundException from '../exceptions/AssetsNotFoundException';
+import AssetNotFoundException from '../exceptions/AssetNotFoundException';
 
 
 class AssetsController implements Controller {
@@ -16,7 +16,6 @@ class AssetsController implements Controller {
 
     private initializeRoutes() {
         this.router.get(this.path, this.getAssets);
-        this.router.get(`${this.path}/:id/history`, this.getAssetHistory);
     }
 
     private getAssets = async (request: express.Request, response: express.Response, next: NextFunction) => {
@@ -51,24 +50,6 @@ class AssetsController implements Controller {
                 response.send(assets);
             } else {
                 next(new AssetNotFoundException(search_term));
-            }
-        } catch (error) {
-            next(error);
-        }
-    }
-
-
-    private getAssetHistory = async (request: express.Request, response: express.Response, next: NextFunction) => {
-        // Call the service function getAssetHistory to get a single crypto asset's history.
-        // Propagate any errors to the next middleware in the chain, or if the asset weren't found
-
-        const id: string = request.params.id;
-        try {
-            const asset = await this.assetsService.getAssetHistory(id);
-            if (asset) {
-                response.send(asset);
-            } else {
-                next(new AssetNotFoundException(id));
             }
         } catch (error) {
             next(error);
