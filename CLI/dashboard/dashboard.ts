@@ -27,7 +27,7 @@ export class Dashboard {
     refresh_rate: number;
     search_term: string;
     lcd_it:number = 0;
-    lcd_text: string[] = ['C', 'O', 'I', 'N', ' ', 'W', 'A', 'T', 'C', 'H', 'E', 'R'];
+    lcd_text: string[] = ['C', 'O', 'I', 'N', ' ', 'M', 'O', 'N', 'I', 'T', 'O', 'R'];
 
     constructor (refresh_rate: number, search_term: string) {
         this.refresh_rate = refresh_rate * 1000;
