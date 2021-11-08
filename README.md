@@ -76,7 +76,7 @@ Before launching the tool, you first need to install these two dependencies.
 Once npm and docker are installed on your machine, you can start the tool! To do so, follow these steps:
 1. Clone the repo:
    ```sh
-   git clone https://github.com/tristandeborde/collective_tech_test.git
+   git clone https://github.com/tristandeborde/CoinMonitor.git
    ```
 2. Get a free API Key at [https://coincap.io/api-key](https://coincap.io/api-key)
 3. Create dot env files, and add your API key to it:
