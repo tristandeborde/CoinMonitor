@@ -25,7 +25,7 @@ describe ("In the AssetsService", () => {
         it("should return an array of assets with the correct values", async () => {
             const assets = await service.getAllAssets();
             expect(assets[0].id).toBe("bitcoin");
-            expect(assets[0].rank).toBe("1");
+            expect(assets[0].rank).toBe(1);
             expect(assets[0].name).toBe("Bitcoin");
             expect(assets[0].symbol).toBe("BTC");
         });
