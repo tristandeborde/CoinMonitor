@@ -4,6 +4,11 @@ import RawAsset, { Asset } from './models/CLIasset.models';
 import fetch from 'node-fetch';
 import rawAssetHistoryEvent, { AssetHistoryEvent } from './models/CLIassetHistory.models';
 
+
+/* 
+ * This class is the main class for the CLI. Its instances stores
+ * blessed widgets instances and the data that they are displaying.
+ */
 export class Dashboard {
     endpoint: string = "http://" + process.env.HOSTNAME + ":" + process.env.PORT;
     screen: blessed.Widgets.Screen = blessed.screen({});
@@ -23,10 +28,14 @@ export class Dashboard {
         this.search_term = search_term;
     }
 
+    /*
+     * Initialize the blessed widgets and data, set intervals and event catchers to refresh 
+     * the latter.
+     */
     launch() {
         // Create new blessed screen and grid
         this.screen = blessed.screen();
-        this.grid = new contrib.grid({rows: 2, cols: 2, screen: this.screen});
+        this.grid = new contrib.grid({rows: 1, cols: 2, screen: this.screen});
         
         this.screen.key(['escape', 'q', 'C-c'], function(ch, key) {
             return process.exit(0);
@@ -89,6 +98,11 @@ export class Dashboard {
         }
     }
 
+    /*
+     * Get the top 150 assets' data from the server, and store it in the table_data variable.
+     * If the search_term is not empty, filter the data.
+     * @returns A promise that resolves to the table_data variable.
+     */
     private async fetchTableData(): Promise<Array<string|number>[]> {
         let endpoint = this.endpoint + "/assets";
         if (this.search_term) {
@@ -107,6 +121,11 @@ export class Dashboard {
         return table_data;
     }
 
+    /*
+     * Get the selected asset's history data from the server, and store it in the
+     * line_data variable. The data is formatted for the line widget.
+     * @returns A promise that resolves to the line_data variable.
+     */
     private async fetchLineData(): Promise<any> {
         // Pass id to fetch
         const response = await fetch(this.endpoint + "/history/" + this.selected);
@@ -127,6 +146,9 @@ export class Dashboard {
         return line_data;
     };
     
+    /*
+     * Render the widgets and data.
+     */
     render() {
         this.table.setData({
             headers: this.keys,
