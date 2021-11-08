@@ -5,7 +5,7 @@
   "main": "dashboard.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node dashboard.ts"
+    "dev": "ts-node app.ts"
   },
   "keywords": [],
   "author": "",

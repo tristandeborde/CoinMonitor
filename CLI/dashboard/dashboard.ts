@@ -1,14 +1,13 @@
 import blessed from 'blessed';
 import contrib from 'blessed-contrib';
-import EventEmitter from 'events';
-import RawAsset, { Asset } from './CLIasset_interface';
+import RawAsset, { Asset } from './interfaces/CLIasset_interface';
 import fetch from 'node-fetch';
-import rawAssetHistoryEvent, { AssetHistoryEvent } from './CLIassetHistory_interface';
+import rawAssetHistoryEvent, { AssetHistoryEvent } from './interfaces/CLIassetHistory_interface';
 
 // load the environment variables from the .env file
 require('dotenv').config();
 
-class AssetWatcher extends EventEmitter {
+export class Dashboard {
     endpoint: string = "http://" + process.env.HOSTNAME + ":" + process.env.PORT + "/assets";
     screen: blessed.Widgets.Screen = blessed.screen({});
     table: any = {};
@@ -19,10 +18,6 @@ class AssetWatcher extends EventEmitter {
     line_data: any = {};
     selected: string = "bitcoin";
     assetIds: string[] = [];
-
-    constructor() {
-        super();
-    }
 
     launch() {
         // Create new blessed screen and grid
@@ -61,13 +56,12 @@ class AssetWatcher extends EventEmitter {
         });
 
         this.table.focus();
-        this.on('update', this.render);
         this.table.rows.on('select', (item: any, index: any) => {
             if (this.selected != this.assetIds[index + 1]) {
                 this.selected = this.assetIds[index + 1];
                 this.fetchLineData().then((data) => {
                     this.line_data = data;
-                    this.emit('update');
+                    this.render();
                 });
             };
         });
@@ -75,16 +69,16 @@ class AssetWatcher extends EventEmitter {
         this.table.focus();
         this.fetchTableData().then((data) => {
             this.table_data = data;
-            this.emit('update');
+            this.render();
         })
         this.fetchLineData().then((data) => {
             this.line_data = data;
-            this.emit('update');
+            this.render();
             });
         setInterval(() => {
             this.fetchTableData().then((data) => {
                 this.table_data = data;
-                this.emit('update');
+                this.render();
             });
         }, 2000);
     }
@@ -134,6 +128,3 @@ class AssetWatcher extends EventEmitter {
         this.screen.render();
     }
 }
-
-let watcher = new AssetWatcher();
-watcher.launch();
