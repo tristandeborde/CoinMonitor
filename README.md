@@ -1,2 +1,112 @@
-# collective_tech_test
-A small back-end able to fetch infos on cryptocurrencies, coded in typescript as a technical test for Collective.work
+<div id="top"></div>
+
+<!-- PROJECT LOGO -->
+<h3 align="center">CoinMonitor</h3>
+
+  <p align="center">
+    Get the latest cryptocurrency data on your terminal.
+    <br />
+  </p>
+</div>
+
+
+
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+  </ol>
+</details>
+
+
+
+<!-- ABOUT THE PROJECT -->
+## About The Project
+
+A small tool able to fetch infos on cryptocurrencies, coded in Typescript during a technical test for [Collective.work](https://www.collective.work/). The repo is divided in two parts, a small back-end responsible with fetching the coin data, and a CLI. 
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
+
+### Built With
+
+* [Node](https://nodejs.org/en/)
+* [Blessed-contrib](https://github.com/yaronn/blessed-contrib)
+* [CoinCap API](https://docs.coincap.io/)
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
+
+<!-- GETTING STARTED -->
+## Getting Started
+
+
+### Prerequisites
+
+Before launching the tool, you first need to install these two dependencies.
+* **npm**:
+  ```sh
+  npm install npm@latest -g
+  ```
+* **docker**:
+  You can follow the [official installation instructions](https://docs.docker.com/get-docker/) from Docker's website to get started.
+
+### Installation
+
+Once npm and docker are installed on your machine, you can start the tool! To do so, follow these steps:
+1. Clone the repo:
+   ```sh
+   git clone https://github.com/tristandeborde/collective_tech_test.git
+   ```
+2. Get a free API Key at [https://coincap.io/api-key](https://coincap.io/api-key)
+3. Create dot env files, and add your API key to it:
+   ```sh
+   echo 'PORT=5000\nCOINCAP_API_KEY="{YOURAPIKEY}"' >> backend/.env
+   echo 'HOSTNAME=localhost\nPORT=5000' >> CLI/.env
+   ```
+4. Launch the backend container on your machine:
+   ```sh
+   make local
+   ```
+5. Launch the CLI:
+   ```sh
+   cd CLI
+   npm run dev
+   ```
+6. Enjoy! :)
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
+<!-- USAGE EXAMPLES -->
+## Usage
+
+While launching the CLI, you can specify a refresh rate and a query string with which to search cryptocurrency (search is done on the back-end). To do so:
+```sh
+npm run dev -- -s="{YOURSEARCHQUERY}" -r={YOURREFRESHRATE}
+```
+If you want to get more usage info, simply use the help command:
+```sh
+npm run dev -- --help
+```
+
+_For more examples, please refer to the [Documentation](https://example.com)_
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
