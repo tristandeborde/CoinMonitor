@@ -4,7 +4,6 @@ import RawAsset, { Asset } from './interfaces/CLIasset_interface';
 import fetch from 'node-fetch';
 import rawAssetHistoryEvent, { AssetHistoryEvent } from './interfaces/CLIassetHistory_interface';
 
-
 export class Dashboard {
     endpoint: string = "http://" + process.env.HOSTNAME + ":" + process.env.PORT + "/assets";
     screen: blessed.Widgets.Screen = blessed.screen({});
@@ -16,6 +15,13 @@ export class Dashboard {
     line_data: any = {};
     selected: string = "bitcoin";
     assetIds: string[] = [];
+    refresh_rate: number;
+    search_term: string;
+
+    constructor (refresh_rate: number, search_term: string) {
+        this.refresh_rate = refresh_rate * 1000;
+        this.search_term = search_term;
+    }
 
     launch() {
         // Create new blessed screen and grid
@@ -73,22 +79,30 @@ export class Dashboard {
             this.line_data = data;
             this.render();
             });
-        setInterval(() => {
-            this.fetchTableData().then((data) => {
-                this.table_data = data;
-                this.render();
-            });
-        }, 2000);
+        if (this.refresh_rate) {
+            setInterval(() => {
+                this.fetchTableData().then((data) => {
+                    this.table_data = data;
+                    this.render();
+                });
+            }, this.refresh_rate);
+        }
     }
 
     private async fetchTableData(): Promise<Array<string|number>[]> {
-        const response = await fetch(this.endpoint);
+        let endpoint = this.endpoint;
+        if (this.search_term) {
+            endpoint = this.endpoint + "?search_term=" + this.search_term;
+        }
+        const response = await fetch(endpoint);
         const data = await response.json() as RawAsset[];
         let table_data: Array<string | number>[] = [];
+        let i : number = 0;
         for (const raw of data) {
             let asset: Asset = new Asset(raw);
             table_data.push([asset.rank, asset.symbol, asset.name, asset.priceUsd, asset.changePercent24Hr]);
-            this.assetIds[asset.rank] = asset.id;
+            // Store the asset id (e.g. "bitcoin") for fetchLineData calls later on
+            this.assetIds[i++] = asset.id;
         }
         return table_data;
     }

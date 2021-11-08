@@ -1,12 +1,11 @@
-import { SSL_OP_COOKIE_EXCHANGE } from 'constants';
 import fetch from 'node-fetch';
-import AssetNotFoundException from '../exceptions/AssetNotFoundException';
 import CoincapRequestException from '../exceptions/CoincapRequestException';
 import RawAsset from '../interfaces/asset.interface';
 import { Asset } from '../interfaces/asset.interface';
 import AssetHistories from '../interfaces/assetHistories.interface';
 import rawAssetHistoryEvent from '../interfaces/assetHistoryEvent.interface';
 import { AssetHistoryEvent } from '../interfaces/assetHistoryEvent.interface';
+import fuzzysort from 'fuzzysort';
 
 // This class fetches data from the /assets endpoint of the coincap.io API
 // and stores it in-memory.
@@ -62,10 +61,15 @@ class AssetsService {
         return this.assets;
     }
 
-    // Fetches data for a specific asset
-    public async getAssetById(id: string): Promise<Asset | undefined> {
+    // Search for assets by name, and return the closest results
+    public async searchAssets(search_term: string): Promise<Asset[]> {
+        console.log("Searching for assets with search_term = " + search_term);
+        // Get all assets in cache or fetch them
         const assets = await this.getAllAssets();
-        return assets.find(a => a.id === id);
+        // Sort them by name using search_term as the query
+        const sorted = fuzzysort.go(search_term, assets, {key: "name", threshold: -10})
+        let results = sorted.map(x => x.obj);
+        return results;
     }
 
     private async fetchOneAssetHistory(id: string): Promise<AssetHistoryEvent[]> {
