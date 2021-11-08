@@ -84,16 +84,19 @@ Once npm and docker are installed on your machine, you can start the tool! To do
    echo 'PORT=5000\nCOINCAP_API_KEY="{YOURAPIKEY}"' >> backend/.env
    echo 'HOSTNAME=localhost\nPORT=5000' >> CLI/.env
    ```
-4. Launch the backend container on your machine:
+4. Launch the backend container on your machine, either in a prod env or dev env:
    ```sh
-   make local
+   make local_build_{prod|dev}
    ```
-5. Launch the CLI:
+5. Install the CLI packages
    ```sh
    cd CLI
+   npm install
+   ```
+6. Launch the CLI and enjoy! :)
+   ```sh
    npm run dev
    ```
-6. Enjoy! :)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
