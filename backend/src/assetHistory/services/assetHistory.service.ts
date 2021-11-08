@@ -64,7 +64,7 @@ class AssetHistoryService {
     public async getAssetHistory(id: string): Promise<AssetHistoryEvent[]> {
         // Check if data is fresh, threshold is one day (interval)
         if (this.assetHistories[id] && this.isDataFresh(86400, this.assetHistories[id].updatedAt)) {
-            return this.assetHistories[id].history.slice(0, 30);
+            return this.assetHistories[id].history.slice(-31, -1);
         }
 
         // Call getAssetHistories to populate the history cache
@@ -73,7 +73,7 @@ class AssetHistoryService {
             history: history,
             updatedAt: new Date() // Store current time for freshness test later on
         };
-        return history.slice(0,30);
+        return history.slice(-31, -1);
     }
 }
 
