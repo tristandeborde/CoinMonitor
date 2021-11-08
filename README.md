@@ -29,6 +29,7 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
+    <li><a href="#TODO">Usage</a></li>
   </ol>
 </details>
 
@@ -45,7 +46,8 @@ A small tool able to fetch infos on cryptocurrencies, coded in Typescript during
 
 ### Built With
 
-* [Node](https://nodejs.org/en/)
+* [Node.js](https://nodejs.org/en/)
+* [Express](https://expressjs.com)
 * [Blessed-contrib](https://github.com/yaronn/blessed-contrib)
 * [CoinCap API](https://docs.coincap.io/)
 
@@ -94,7 +96,7 @@ Once npm and docker are installed on your machine, you can start the tool! To do
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
-<!-- USAGE EXAMPLES -->
+<!-- USAGE -->
 ## Usage
 
 While launching the CLI, you can specify a refresh rate and a query string with which to search cryptocurrency (search is done on the back-end). To do so:
@@ -106,7 +108,12 @@ If you want to get more usage info, simply use the help command:
 npm run dev -- --help
 ```
 
-_For more examples, please refer to the [Documentation](https://example.com)_
-
 <p align="right">(<a href="#top">back to top</a>)</p>
+
+<!-- TODO -->
+## TODO
+
+- [ ] Adding a box displaying the coin logo in the CLI. First, add a script to scrape logos from https://cryptologos.cc/ at container start, and then serve these static files from Express. Blessed-contrib has got some impressive image widgets that can render images in the terminal ;)
+- [ ] Create MVC base classes, especially for AssetsService and AssetHistoryService (CoinCapService class?), in order to further improve back-end architecture.
+- [ ] Remote hosting of backend container, with Makefile command to deploy.
 
