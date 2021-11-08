@@ -38,7 +38,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[GIF of the CoinMonitor in action](https://s9.gifyu.com/images/coinwatcher.gif)
+![GIF of the CoinMonitor in action](https://s9.gifyu.com/images/coinwatcher.gif)
 
 A small tool able to fetch infos on cryptocurrencies, coded in Typescript during a technical test for [Collective.work](https://www.collective.work/). The repo is divided in two parts, a small back-end responsible with fetching the coin data, and a CLI. 
 
