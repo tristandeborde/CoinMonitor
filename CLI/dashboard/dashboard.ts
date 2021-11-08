@@ -4,8 +4,6 @@ import RawAsset, { Asset } from './interfaces/CLIasset_interface';
 import fetch from 'node-fetch';
 import rawAssetHistoryEvent, { AssetHistoryEvent } from './interfaces/CLIassetHistory_interface';
 
-// load the environment variables from the .env file
-require('dotenv').config();
 
 export class Dashboard {
     endpoint: string = "http://" + process.env.HOSTNAME + ":" + process.env.PORT + "/assets";
